@@ -1,0 +1,13 @@
+{
+  "clf": "LogisticRegression(max_iter=5000, random_state=42)",
+  "clf__C": 10.0,
+  "clf__penalty": "l2",
+  "clf__solver": "liblinear",
+  "normalizer__technique": null,
+  "tfidf__max_features": 10000,
+  "tfidf__min_df": 5,
+  "tfidf__ngram_range": [
+    1,
+    2
+  ]
+}

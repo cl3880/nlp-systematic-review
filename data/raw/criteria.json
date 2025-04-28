@@ -1,0 +1,65 @@
+{
+    "publication_year": {
+      "include": "Published in 2000 or later",
+      "exclude": "Published before 2000"
+    },
+    "language": {
+      "include": "English or French",
+      "exclude": "Non-English and non-French articles"
+    },
+    "population": {
+      "include": "All patients are ≥18 years old with brain AVMs",
+      "exclude": [
+        "Only pediatric populations",
+        "Pregnant patients",
+        "Patients with dural arteriovenous fistulas",
+        "Patients with pial arteriovenous fistulas",
+        "Patients with vein of Galen malformations",
+        "Patients with cavernous malformations"
+      ]
+    },
+    "age_mention_in_text": {
+      "include": "No mention of patients under 18",
+      "exclude": "Any mention of patients under 18 (e.g., 'age range 4–98')"
+    },
+    "study_design": {
+      "include": [
+        "Randomized controlled trials",
+        "Clinical trials",
+        "Cohort studies",
+        "Case series",
+        "Systematic reviews"
+      ],
+      "exclude": [
+        "Case studies with fewer than 10 patients",
+        "Meta-analyses",
+        "Literature reviews"
+      ]
+    },
+    "outcome_reporting": {
+      "include": "Mentions methodology for AVM occlusion rate reporting",
+      "exclude": "No mention of AVM occlusion rates"
+    },
+    "intervention_exposure": {
+      "include": [
+        "Gamma Knife",
+        "CyberKnife",
+        "Novalis",
+        "Linear accelerator-based radiosurgery"
+      ],
+      "exclude": "Treatment with other methods"
+    },
+    "automatic_exclusion_keywords": {
+      "exclude": [
+        "hypofractionated",
+        "proton beam therapy",
+        "fractionated stereotactic radiotherapy",
+        "fractionated stereotactic surgery",
+        "tomotherapy"
+      ]
+    },
+    "patient_minimum": {
+      "include": "No patient number specified → keep",
+      "exclude": "If specified and <30 patients → exclude"
+    }
+  }

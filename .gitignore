@@ -1,0 +1,8 @@
+venv/
+reports/
+results/
+__pycache__/
+*.log
+/results/logs
+*.pyc
+*.swp
