@@ -1,8 +1,12 @@
 venv/
-reports/
-results/
+archive/
 __pycache__/
 *.log
+logs/
 /results/logs
 *.pyc
 *.swp
+z_archive/
+cache/
+*.pkl
+src/scripts/run_experiments.py

@@ -5,11 +5,53 @@ Configuration settings for the systematic review classification project.
 PATHS = {
     "data_raw":        "data/raw",
     "data_processed":  "data/processed",
-    "results_dir":     "results",
+    "grid_results_dir":     "results",
     "logs_dir":        "results/logs",
     "baseline_dir":    "results/baseline",
-    "build_data_dir":  "results/build_data"
+    "build_data_dir":  "results/build_data",
+    "normalization_dir": "results/normalization"
 }
+
+# v2.0.0 results structure
+RESULTS_V2 = {
+    "base_dir": "results/v2.0.0-f1-refactor",
+    "base_models": {
+        "logreg": "results/v2.0.0-f1-refactor/base_logreg",
+        "svm": "results/v2.0.0-f1-refactor/base_svm",
+        "cnb": "results/v2.0.0-f1-refactor/base_cnb",
+        "cosine": "results/v2.0.0-f1-refactor/base_cosine"
+    },
+    "normalization": {
+        "stemming": {
+            "logreg": "results/v2.0.0-f1-refactor/normalization/stemming_logreg",
+            "svm": "results/v2.0.0-f1-refactor/normalization/stemming_svm",
+            "cnb": "results/v2.0.0-f1-refactor/normalization/stemming_cnb",
+            "cosine": "results/v2.0.0-f1-refactor/normalization/stemming_cosine"
+        },
+        "lemmatization": {
+            "logreg": "results/v2.0.0-f1-refactor/normalization/lemmatization_logreg",
+            "svm": "results/v2.0.0-f1-refactor/normalization/lemmatization_svm",
+            "cnb": "results/v2.0.0-f1-refactor/normalization/lemmatization_cnb",
+            "cosine": "results/v2.0.0-f1-refactor/normalization/lemmatization_cosine"
+        }
+    }
+}
+
+def get_result_path_v2(model_type, normalization=None):
+    """
+    Get the path for a specific model and normalization in the v2.0.0 structure.
+    
+    Args:
+        model_type: Model type (logreg, svm, cnb, cosine)
+        normalization: Normalization technique (stemming, lemmatization, or None)
+        
+    Returns:
+        str: Path to the results directory
+    """
+    if normalization:
+        return RESULTS_V2["normalization"][normalization][model_type]
+    else:
+        return RESULTS_V2["base_models"][model_type]
 
 MODEL_CONFIG = {
     "paths": {

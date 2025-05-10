@@ -1,44 +1,92 @@
 # src/models/param_grids.py
+"""
+Parameter grids for grid search experiments.
 
-from imblearn.over_sampling    import SMOTE
-from imblearn.under_sampling   import RandomUnderSampler
-from sklearn.linear_model      import LogisticRegression
-from sklearn.svm               import SVC
+This module defines parameter grids for different model types
+to be used in grid search experiments.
+"""
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.naive_bayes import ComplementNB
 
-from src.models.baseline_classifier import baseline_param_grid, CosineSimilarityClassifier
-from src.models.svm_classifier      import svm_param_grid
+from src.models.classifiers import CosineSimilarityClassifier
 
-def full_param_grid():
-    """
-    Combines:
-      - normalization: none, stemming, lemmatization
-      - TF-IDF & logreg hyperparams (from baseline_param_grid)
-      - TF-IDF & svm hyperparams (from svm_param_grid)
-      - balancing: none, SMOTE, undersample
-      - classifier choice: logreg, svm, cosine
-    into one big grid for GridSearchCV.
-    """
-    tfidf_lr_grid = baseline_param_grid()
-    tfidf_svm_grid = svm_param_grid()
-
-    tfidf_keys = {k: v for k, v in tfidf_lr_grid.items() if k.startswith("tfidf__")}
-    
+def get_common_tfidf_grid():
+    """Common TF-IDF parameters for all models."""
     return {
-        "normalizer__technique": [None, "stemming", "lemmatization"],
-        **tfidf_keys,
-        "sampler": [
-            None,
-            SMOTE(random_state=42),
-            RandomUnderSampler(random_state=42)
-        ],
-        "clf": [
-            LogisticRegression(max_iter=5000, solver="liblinear", class_weight="balanced"),
-            SVC(kernel="linear", probability=True, class_weight="balanced"),
-            CosineSimilarityClassifier()
-        ],
-        **{
-            f"clf__{param_name.split('clf__',1)[1]}": values
-            for param_name, values in tfidf_svm_grid.items()
-            if param_name.startswith("clf__")
-        }
+        "tfidf__min_df": [1, 2, 3, 5, 10],
+        "tfidf__max_df": [0.85, 0.9, 0.95, 1.0],
+        "tfidf__max_features": [5000, 10000, 20000],
+        "tfidf__ngram_range": [(1, 2), (1, 3)],
+    }
+
+def logreg_param_grid():
+    """Parameter grid for Logistic Regression model."""
+    grid = get_common_tfidf_grid()
+    grid.update({
+        "clf__C": [0.01, 0.1, 1, 10, 100],
+        "clf__class_weight": ["balanced"],
+        "clf__penalty": ["l1", "l2"],
+        "clf__solver": ["liblinear"],
+    })
+    return grid
+
+def svm_param_grid():
+    """Parameter grid for SVM model."""
+    grid = get_common_tfidf_grid()
+    grid.update({
+        "clf__C": [0.01, 0.1, 1, 10, 100],
+        "clf__class_weight": ["balanced"],
+        "clf__kernel": ["linear"],
+    })
+    return grid
+
+def cnb_param_grid():
+    """Parameter grid for Complement Naive Bayes model."""
+    grid = get_common_tfidf_grid()
+    grid.update({
+        "clf__alpha": [0.1, 0.5, 1.0, 2.0, 5.0],
+        "clf__norm": [True, False],
+    })
+    return grid
+
+def cosine_param_grid():
+    """Parameter grid for Cosine Similarity model."""
+    g = get_common_tfidf_grid()
+    g["clf__threshold"] = [0.1, 0.2, 0.25,0.3, 0.35, 0.4, 0.5]
+    return g
+
+def get_param_grid(model_type):
+    """
+    Get parameter grid based on model type.
+    
+    Args:
+        model_type: Type of model ('logreg', 'svm', 'cosine', 'cnb')
+        
+    Returns:
+        dict: Parameter grid for GridSearchCV
+    """
+    if model_type == "logreg":
+        return logreg_param_grid()
+    elif model_type == "svm":
+        return svm_param_grid()
+    elif model_type == "cosine":
+        return cosine_param_grid()
+    elif model_type == "cnb":
+        return cnb_param_grid()
+    else:
+        raise ValueError(f"Unsupported model type: {model_type}")
+
+def test_param_grid():
+    """
+    A minimal parameter grid for testing purposes.
+    Total combinations: 2 features × 1 ngram × 1 classifier = 2 combinations
+    """
+    return {
+        "tfidf__max_features": [5000, 10000],
+        "tfidf__ngram_range": [(1, 2)],
+        "tfidf__min_df": [3],
+        "tfidf__max_df": [0.95],
+        "clf__C": [1.0],
+        "clf__class_weight": ["balanced"],
     }
