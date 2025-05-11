@@ -21,7 +21,6 @@ import json
 from datetime import datetime
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
-from src.utils.result_utils import get_metrics_path, get_plot_path
 
 logger = logging.getLogger(__name__)
 

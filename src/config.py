@@ -34,22 +34,33 @@ RESULTS_V2 = {
             "cnb": "results/v2.0.0-f1-refactor/normalization/lemmatization_cnb",
             "cosine": "results/v2.0.0-f1-refactor/normalization/lemmatization_cosine"
         }
+    },
+    "balancing": {
+        "smote": {
+            "logreg": "results/v2.0.0-f1-refactor/balancing/smote_logreg",
+            "svm": "results/v2.0.0-f1-refactor/balancing/smote_svm",
+            "cnb": "results/v2.0.0-f1-refactor/balancing/smote_cnb",
+            "cosine": "results/v2.0.0-f1-refactor/balancing/smote_cosine"
+        }
     }
 }
 
-def get_result_path_v2(model_type, normalization=None):
+def get_result_path_v2(model_type, normalization=None, balancing=None):
     """
     Get the path for a specific model and normalization in the v2.0.0 structure.
     
     Args:
         model_type: Model type (logreg, svm, cnb, cosine)
         normalization: Normalization technique (stemming, lemmatization, or None)
+        balancing: Balancing technique (smote or None)
         
     Returns:
         str: Path to the results directory
     """
     if normalization:
         return RESULTS_V2["normalization"][normalization][model_type]
+    elif balancing:
+        return RESULTS_V2["balancing"][balancing][model_type]
     else:
         return RESULTS_V2["base_models"][model_type]
 

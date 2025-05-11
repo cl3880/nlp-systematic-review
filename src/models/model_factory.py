@@ -100,7 +100,6 @@ def create_model(
     """
     base = []
     memory = cache_dir if normalization is not None else None
-    pipeline = ClassifierPipeline(base, memory=memory)
     
     if normalization:
         base.append(
@@ -166,7 +165,6 @@ def create_model(
     else:
         raise ValueError(f"Unsupported model type: {model_type}")
     
-
     if balancing:
         if balancing == "smote":
             sampler = SMOTE(random_state=42)
@@ -175,10 +173,12 @@ def create_model(
         else:
             raise ValueError(f"Unsupported balancing strategy: {balancing}")
         
-        steps_with_sampler = pipeline.base[:-1] + [("sampler", sampler)] + [pipeline.base[-1]]
-        pipeline = ImbPipeline(steps_with_sampler)
-    
-    return pipeline
+        # Create a properly structured pipeline with SMOTE
+        steps_with_sampler = base[:-1] + [("sampler", sampler)] + [base[-1]]
+        return ImbPipeline(steps_with_sampler)
+    else:
+        pipeline = ClassifierPipeline(base, memory=memory)
+        return pipeline
 
 def create_pipeline(model_type, **kwargs):
     if model_type == "logreg":

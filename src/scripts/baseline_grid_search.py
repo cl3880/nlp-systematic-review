@@ -70,7 +70,6 @@ def preprocess_corpus(df, text_columns=["title", "abstract"], technique=None):
     
     return result_df
 
-# Logger will be configured in main() to ensure model-specific setup
 logger = logging.getLogger(__name__)
 
 def get_param_grid(model_type):
@@ -92,13 +91,16 @@ def override_threshold(pipe, thresh):
         pass
     return pipe
 
-def run_grid_search(X_train, y_train, model_type="logreg", normalization=None, cv=5, output_dir="results", cache_dir=None, text_columns=["title", "abstract"]):
+def run_grid_search(X_train, y_train, model_type="logreg", normalization=None, balancing=None, cv=5, output_dir="results", cache_dir=None, text_columns=["title", "abstract"]):
     """Run grid search to find balanced and high-recall models"""
-    pipeline = create_model(model_type = model_type, normalization = None, text_columns = text_columns, cache_dir=cache_dir)
+    pipeline = create_model(model_type = model_type, normalization = None, balancing = balancing, text_columns = text_columns, cache_dir=cache_dir)
     logger.info(f"Using {model_type.upper()} model")
     override_threshold(pipeline, 0.33)
     logger.info(f"Using {model_type.upper()} model with normalization={normalization}")
     
+    if balancing:
+        logger.info(f"Using balancing technique: {balancing}")
+
     param_grid = get_param_grid(model_type)
     
     scoring = {
@@ -317,6 +319,8 @@ def main():
                       help="Text normalization technique (None, 'stemming', or 'lemmatization')")
     parser.add_argument("--cache_dir", type=str, default="cache",
                       help="Directory for caching pipeline transformations")
+    parser.add_argument("--balancing", type=str, choices=["none", "smote"], default=None,
+                      help="Balancing technique (none, smote)")
     parser.add_argument("--cv", type=int, default=5,
                       help="Number of cross-validation folds")
     parser.add_argument("--debug", action="store_true",
@@ -324,25 +328,40 @@ def main():
     
     args = parser.parse_args()
     
-    # Set up model-specific logging
     global logger
     log_level = logging.DEBUG if args.debug else logging.INFO
     
-    # Set up model-specific log directory
     model_type_str = args.model
     if args.normalization:
         model_type_str = f"{args.normalization}_{args.model}"
+    elif args.balancing and args.balancing != "none":
+        model_type_str = f"{args.balancing}_{args.model}"
     
-    # Configure model-specific logger
     logger = setup_per_model_logging(model_type_str, name=__name__, level=log_level)
     
     if args.debug:
         logger.debug("Debug logging enabled")
         
-    logger.info(f"Starting grid search experiment for {args.model} model" + 
-              (f" with {args.normalization} normalization" if args.normalization else ""))
+    logger_msg = f"Starting grid search experiment for {args.model} model"
+    if args.normalization:
+        logger_msg += f" with {args.normalization} normalization"
+    if args.balancing and args.balancing != "none":
+        logger_msg += f" with {args.balancing} balancing"
+    logger.info(logger_msg)
     
-    os.makedirs(args.output, exist_ok=True)
+    if args.output == "results/grid_search": 
+        if args.normalization:
+            output_dir = get_result_path_v2(args.model, normalization=args.normalization)
+        elif args.balancing and args.balancing != "none":
+            output_dir = get_result_path_v2(args.model, balancing=args.balancing)
+        else:
+            output_dir = get_result_path_v2(args.model)
+    else:
+        output_dir = args.output
+    
+    os.makedirs(output_dir, exist_ok=True)
+    logger.info(f"Results will be saved to {output_dir}")
+    
     cache_dir = args.cache_dir if args.cache_dir else None
     if cache_dir:
         os.makedirs(cache_dir, exist_ok=True)
@@ -375,8 +394,8 @@ def main():
         logger.debug(f"Label distribution - Val: {np.bincount(y_val)}")
     
     grid, balanced_model, balanced_params, _, _, ngram_analysis = run_grid_search(
-        X_train, y_train, model_type=args.model, normalization=args.normalization, 
-        cv=args.cv, output_dir=args.output, text_columns=text_columns,
+        X_train, y_train, model_type=args.model, normalization=args.normalization, balancing=args.balancing,
+        cv=args.cv, output_dir=output_dir, text_columns=text_columns,
         cache_dir=cache_dir
     )
     
@@ -407,7 +426,7 @@ def main():
         balanced_model, high_recall_model,
         bal_metrics, hr_metrics,
         balanced_params, high_recall_params,
-        threshold, args.output, args.model,
+        threshold, output_dir, args.model,
         X_val, y_val, y_prob_bal, y_prob_hr,
         ngram_analysis
     )

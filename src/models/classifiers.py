@@ -20,7 +20,6 @@ from sklearn.svm import SVC
 from sklearn.base import BaseEstimator, TransformerMixin, ClassifierMixin
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics import pairwise_distances
-from src.utils.result_utils import get_plot_path, get_metrics_path
 
 logger = logging.getLogger(__name__)
 
