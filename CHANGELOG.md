@@ -1,5 +1,15 @@
 # Changelog: Systematic Review Classification Implementation
 
+## [2.1.0] - 2025-05-11
+
+### SMOTE Implementation
+
+- **Model factory**: Added a `balancing` parameter (`None` | `"smote"` | `"undersample"`) to `create_model()`, wiring in Imbalanced-Learn’s `SMOTE(random_state=42)` and `RandomUnderSampler(random_state=42)` steps just before the classifier node via an `ImbPipeline`.
+- **Result directory logic**: Refactored `config.py` to own all path definitions and updated `baseline_grid_search.py` to consume these settings; results folders have been manually reorganized to match the desired structure, deferring automated directory creation for a future refactor.
+   - SMOTE-SVM run was executed manually and its outputs live under `results/v2.0.0-f1-refactor/smote_svm/`
+- **CLI & grid search**: Modified `baseline_grid_search.py` to accept a `--balancing` flag, propagate it into `run_grid_search()`/`create_model()`, and label logs, model names, and output folders accordingly (e.g. `smote_logreg`).  
+- **Imports & cleanup**: Refactored deprecated or unused imports in both `model_factory.py` and `config.py` to align with the new sampling logic.  
+
 ## [2.0.0] - 2025-05-10
 
 1. **Threshold tuning bug (v1)**:
