@@ -1,8 +1,12 @@
 # Systematic Review Classification: Results Summary
 
+[![CI](https://github.com/cl3880/nlp_final_project/workflows/CI/badge.svg)](https://github.com/cl3880/nlp_final_project/actions)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Project Overview
 
-This repository implements a comprehensive machine learning pipeline for systematic review screening, focusing on brain arteriovenous malformation (AVM) literature classification. The project evaluates multiple classifiers, text normalization techniques, balancing methods, and expert-derived features to optimize both balanced performance and high-recall screening scenarios.
+This repository implements a comprehensive machine-learning pipeline for systematic review screening of brain arteriovenous malformation (AVM) literature. Building on methodologies from the ACL and LREC communities, it evaluates multiple classifiers (SVM, Logistic Regression, Complement Naive Bayes, Cosine Similarity), text-normalization techniques (stemming, lemmatization), sampling methods (SMOTE, undersampling), and expert-derived features (inclusion/exclusion criteria, MeSH terms) to identify the best combination of classifier and hyperparameters. Unlike prior work, which often applies a single model with fixed settings, our experiments isolate each variable to reveal its individual impact. All techniques and parameter choices were adapted and extended from the references listed below and tested on a novel AVM dataset.
 
 ## Project Structure
 
