@@ -4,10 +4,8 @@ Configuration settings for the systematic review classification project.
 Version 3.0.0 - Cleaned and organized structure
 """
 
-# Project version
 VERSION = "3.0.0"
 
-# Data paths
 PATHS = {
     "data_raw": "data/raw",
     "data_processed": "data/processed", 
@@ -16,7 +14,6 @@ PATHS = {
     "archive_dir": "archive"
 }
 
-# Organized results structure matching README stages and actual methodology
 RESULTS_FINAL = {
     "stage1_baseline_gridsearch_skf": "results_final/stage1_baseline_gridsearch_skf",
     "stage2_normalization_smote_grid_search": "results_final/stage2_normalization_smote_grid_search",
@@ -25,7 +22,6 @@ RESULTS_FINAL = {
     "final_test_evaluation": "results_final/final_test_evaluation"
 }
 
-# Legacy results structure (for backward compatibility)
 RESULTS_V2 = {
     "base_svm": "results/v2.0.0-f1-refactor/base_svm",
     "base_logreg": "results/v2.0.0-f1-refactor/logreg", 
@@ -34,7 +30,6 @@ RESULTS_V2 = {
     "smote_svm": "results/v2.0.0-f1-refactor/smote_svm"
 }
 
-# Model configurations
 MODEL_CONFIGS = {
     "baseline_svm_params": {
         "clf__C": 1,
@@ -60,12 +55,11 @@ def get_result_path_v2(model_type, normalization=None, balancing=None):
     else:
         return RESULTS_V2.get(f"base_{model_type}", f"results/v2.0.0-f1-refactor/base_{model_type}")
 
-# Default cross-validation parameters
 DEFAULT_CV_PARAMS = {
     "n_splits": 5,
     "shuffle": True, 
     "random_state": 42,
-    "stratified": True  # All experiments use StratifiedKFold
+    "stratified": True 
 }
 
 # Text processing parameters 
@@ -84,17 +78,15 @@ FEATURE_PARAMS = {
     "mesh_terms_column": "mesh_terms"
 }
 
-# Evaluation metrics
 METRICS = {
     "primary": ["precision", "recall", "f1", "f2", "roc_auc"],
-    "specialized": ["wss_at_95"],  # Work Saved over Sampling at 95% recall
+    "specialized": ["wss_at_95"],
     "thresholds": {
         "high_recall_target": 0.95,
         "balanced_threshold": 0.5
     }
 }
 
-# Plotting configuration
 PLOT_CONFIG = {
     "figure_size": (10, 8),
     "dpi": 300,
