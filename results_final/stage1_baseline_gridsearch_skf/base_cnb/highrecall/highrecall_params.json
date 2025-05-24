@@ -1,0 +1,12 @@
+{
+  "clf__alpha": 0.1,
+  "clf__norm": true,
+  "tfidf__max_df": 0.9,
+  "tfidf__max_features": 10000,
+  "tfidf__min_df": 2,
+  "tfidf__ngram_range": [
+    1,
+    2
+  ],
+  "optimal_threshold": 0.49999564235682203
+}

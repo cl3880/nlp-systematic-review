@@ -1,0 +1,10 @@
+{
+  "clf__threshold": 0.25,
+  "tfidf__max_df": 0.85,
+  "tfidf__max_features": 20000,
+  "tfidf__min_df": 3,
+  "tfidf__ngram_range": [
+    1,
+    3
+  ]
+}

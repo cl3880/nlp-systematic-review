@@ -1,0 +1,40 @@
+{
+  "model_name": "svm_fixed_params_smote",
+  "balanced": {
+    "precision": 0.72,
+    "recall": 0.75,
+    "f1": 0.7346938775510204,
+    "f2": 0.7438016528925621,
+    "roc_auc": 0.95446735395189,
+    "wss_at_95": 0.724388379204893,
+    "true_positives": 18,
+    "false_positives": 7,
+    "true_negatives": 187,
+    "false_negatives": 6
+  },
+  "high_recall": {
+    "precision": 0.2948717948717949,
+    "recall": 0.9583333333333334,
+    "f1": 0.45098039215686275,
+    "f2": 0.6609195402298851,
+    "roc_auc": 0.95446735395189,
+    "wss_at_95": 0.724388379204893,
+    "true_positives": 23,
+    "false_positives": 55,
+    "true_negatives": 139,
+    "false_negatives": 1
+  },
+  "threshold": 1.0116686834376285e-05,
+  "params": {
+    "max_features": 5000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 1,
+    "max_df": 0.85,
+    "C": 1,
+    "class_weight": "balanced",
+    "kernel": "linear"
+  }
+}

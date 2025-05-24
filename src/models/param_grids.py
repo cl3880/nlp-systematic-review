@@ -8,7 +8,6 @@ to be used in grid search experiments.
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.naive_bayes import ComplementNB
-
 from src.models.classifiers import CosineSimilarityClassifier
 
 def get_common_tfidf_grid():
@@ -55,6 +54,44 @@ def cosine_param_grid():
     g = get_common_tfidf_grid()
     g["clf__threshold"] = [0.1, 0.2, 0.25,0.3, 0.35, 0.4, 0.5]
     return g
+
+def criteria_param_grid(model_type="svm"):
+    """
+    Define scientifically rigorous parameter grid for criteria-enhanced models.
+    
+    Parameters:
+    -----------
+    model_type : str
+        Type of classifier to use ('logreg', 'svm')
+        
+    Returns:
+    --------
+    dict
+        Parameter grid dictionary for GridSearchCV
+    """
+    if model_type == "svm":
+        return {
+            "features__text_features__tfidf__max_features": [5000, 10000, 20000],
+            "features__text_features__tfidf__ngram_range": [(1, 2), (1, 3)],
+            "features__text_features__tfidf__min_df": [3, 5, 10],
+            "features__text_features__tfidf__max_df": [0.85, 0.9, 0.95],
+            "clf__C": [0.1, 1, 10],
+            "clf__class_weight": ["balanced"],
+            "clf__kernel": ["linear"]
+        }
+    elif model_type == "logreg":
+        return {
+            "features__text_features__tfidf__max_features": [5000, 10000, 20000],
+            "features__text_features__tfidf__ngram_range": [(1, 2), (1, 3)],
+            "features__text_features__tfidf__min_df": [1, 3, 5],
+            "features__text_features__tfidf__max_df": [0.85, 0.9, 0.95],
+            "clf__C": [0.1, 1, 10],
+            "clf__class_weight": ["balanced"],
+            "clf__penalty": ["l1", "l2"],
+            "clf__solver": ["liblinear"]
+        }
+    else:
+        raise ValueError(f"Unsupported model type: {model_type}")
 
 def get_param_grid(model_type):
     """

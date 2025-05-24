@@ -1,0 +1,40 @@
+{
+  "model_name": "stemming_svm_fixed_params_smote",
+  "balanced": {
+    "precision": 0.5483870967741935,
+    "recall": 0.7083333333333334,
+    "f1": 0.6181818181818182,
+    "f2": 0.6692913385826772,
+    "roc_auc": 0.946520618556701,
+    "wss_at_95": 0.7198012232415902,
+    "true_positives": 17,
+    "false_positives": 14,
+    "true_negatives": 180,
+    "false_negatives": 7
+  },
+  "high_recall": {
+    "precision": 0.3026315789473684,
+    "recall": 0.9583333333333334,
+    "f1": 0.46,
+    "f2": 0.6686046511627908,
+    "roc_auc": 0.946520618556701,
+    "wss_at_95": 0.7198012232415902,
+    "true_positives": 23,
+    "false_positives": 53,
+    "true_negatives": 141,
+    "false_negatives": 1
+  },
+  "threshold": 1.4175333459642705e-05,
+  "params": {
+    "max_features": 5000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 1,
+    "max_df": 0.85,
+    "C": 1,
+    "class_weight": "balanced",
+    "kernel": "linear"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "clf__C": 1,
+  "clf__class_weight": "balanced",
+  "clf__kernel": "linear",
+  "features__text_features__tfidf__max_df": 0.85,
+  "features__text_features__tfidf__max_features": 20000,
+  "features__text_features__tfidf__min_df": 3,
+  "features__text_features__tfidf__ngram_range": [
+    1,
+    2
+  ]
+}

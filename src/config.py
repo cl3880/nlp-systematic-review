@@ -1,114 +1,103 @@
 # config.py
 """
 Configuration settings for the systematic review classification project.
+Version 3.0.0 - Cleaned and organized structure
 """
+
+# Project version
+VERSION = "3.0.0"
+
+# Data paths
 PATHS = {
-    "data_raw":        "data/raw",
-    "data_processed":  "data/processed",
-    "grid_results_dir":     "results",
-    "logs_dir":        "results/logs",
-    "baseline_dir":    "results/baseline",
-    "build_data_dir":  "results/build_data",
-    "normalization_dir": "results/normalization"
+    "data_raw": "data/raw",
+    "data_processed": "data/processed", 
+    "results_dir": "results_final",
+    "logs_dir": "results_final/logs",
+    "archive_dir": "archive"
 }
 
-# v2.0.0 results structure
+# Organized results structure matching README stages and actual methodology
+RESULTS_FINAL = {
+    "stage1_baseline_gridsearch_skf": "results_final/stage1_baseline_gridsearch_skf",
+    "stage2_normalization_smote_grid_search": "results_final/stage2_normalization_smote_grid_search",
+    "stage3_svm_fixed_params_skf": "results_final/stage3_svm_fixed_params_skf", 
+    "stage4_svm_fixed_params_features_skf": "results_final/stage4_svm_fixed_params_features_skf",
+    "final_test_evaluation": "results_final/final_test_evaluation"
+}
+
+# Legacy results structure (for backward compatibility)
 RESULTS_V2 = {
-    "base_dir": "results/v2.0.0-f1-refactor",
-    "base_models": {
-        "logreg": "results/v2.0.0-f1-refactor/base_logreg",
-        "svm": "results/v2.0.0-f1-refactor/base_svm",
-        "cnb": "results/v2.0.0-f1-refactor/base_cnb",
-        "cosine": "results/v2.0.0-f1-refactor/base_cosine"
-    },
-    "normalization": {
-        "stemming": {
-            "logreg": "results/v2.0.0-f1-refactor/normalization/stemming_logreg",
-            "svm": "results/v2.0.0-f1-refactor/normalization/stemming_svm",
-            "cnb": "results/v2.0.0-f1-refactor/normalization/stemming_cnb",
-            "cosine": "results/v2.0.0-f1-refactor/normalization/stemming_cosine"
-        },
-        "lemmatization": {
-            "logreg": "results/v2.0.0-f1-refactor/normalization/lemmatization_logreg",
-            "svm": "results/v2.0.0-f1-refactor/normalization/lemmatization_svm",
-            "cnb": "results/v2.0.0-f1-refactor/normalization/lemmatization_cnb",
-            "cosine": "results/v2.0.0-f1-refactor/normalization/lemmatization_cosine"
-        }
-    },
-    "balancing": {
-        "smote": {
-            "logreg": "results/v2.0.0-f1-refactor/balancing/smote_logreg",
-            "svm": "results/v2.0.0-f1-refactor/balancing/smote_svm",
-            "cnb": "results/v2.0.0-f1-refactor/balancing/smote_cnb",
-            "cosine": "results/v2.0.0-f1-refactor/balancing/smote_cosine"
-        }
+    "base_svm": "results/v2.0.0-f1-refactor/base_svm",
+    "base_logreg": "results/v2.0.0-f1-refactor/logreg", 
+    "base_cnb": "results/v2.0.0-f1-refactor/base_cnb",
+    "normalization": "results/v2.0.0-f1-refactor/normalization",
+    "smote_svm": "results/v2.0.0-f1-refactor/smote_svm"
+}
+
+# Model configurations
+MODEL_CONFIGS = {
+    "baseline_svm_params": {
+        "clf__C": 1,
+        "clf__class_weight": "balanced", 
+        "clf__kernel": "linear",
+        "tfidf__max_df": 0.85,
+        "tfidf__max_features": 5000,
+        "tfidf__min_df": 1,
+        "tfidf__ngram_range": (1, 2)
     }
 }
+
+def get_result_path_final(stage):
+    """Get path for final results by stage."""
+    return RESULTS_FINAL.get(stage, "results_final/unknown")
 
 def get_result_path_v2(model_type, normalization=None, balancing=None):
-    """
-    Get the path for a specific model and normalization in the v2.0.0 structure.
-    
-    Args:
-        model_type: Model type (logreg, svm, cnb, cosine)
-        normalization: Normalization technique (stemming, lemmatization, or None)
-        balancing: Balancing technique (smote or None)
-        
-    Returns:
-        str: Path to the results directory
-    """
+    """Get path for v2 results structure (legacy)."""
     if normalization:
-        return RESULTS_V2["normalization"][normalization][model_type]
+        return f"results/v2.0.0-f1-refactor/normalization/{normalization}_{model_type}"
     elif balancing:
-        return RESULTS_V2["balancing"][balancing][model_type]
+        return f"results/v2.0.0-f1-refactor/{balancing}_{model_type}"  
     else:
-        return RESULTS_V2["base_models"][model_type]
+        return RESULTS_V2.get(f"base_{model_type}", f"results/v2.0.0-f1-refactor/base_{model_type}")
 
-MODEL_CONFIG = {
-    "paths": {
-        "output_dir":  "results/models",
-        "cache_dir":   "cache",
-        "log_file":    "results/logs/training.log",
-        "models_dir":  "results/baseline/models",
-        "metrics_dir": "results/baseline/metrics",
-        "plots_dir":   "results/baseline/plots",
-        "analysis_dir":"results/baseline/analysis"
-    },
-    
-    "tfidf": {
-        "max_features": 10000,
-        "ngram_range": (1, 2),
-        "min_df": 3,
-        "sublinear_tf": True,
-        "stop_words": "english"
-    },
-    
-    "classifier": {
-        "C": 1.0,
-        "penalty": "l2",
-        "solver": "liblinear",
-        "class_weight": "balanced",
-        "random_state": 42
-    },
-    
-    "evaluation": {
-        "recall_threshold": 0.95,
-        "cv_folds": 5
-    },
-    
-    "regex": {
-        "sample_size": r"(?:n\s*=\s*|sample\s+size\s*(?:of|was|:|=)\s*)(\d+)",
-        "occlusion": r"(?:occlusion|obliteration)\s+(?:rate|percentage|ratio)",
-        "adult_age": r"(?:\b(?:adult|mature|grown)\b|(?:older|elderly)\s+(?:than|adults?)|\b(?:age[ds]?|older)\s+(?:\d+|\w+teen))",
-        "pediatric": r"\b(?:child|children|pediatric|infant|adolescent|neonatal|juvenile)\b",
-        "age_range": r"(?:age|aged)\s+(?:range|between|from)?\s*(?:was|:)?\s*(\d+)(?:\s*[-–]\s*|\s+to\s+)(\d+)",
-        "radiosurgery": r"\b(?:radiosurg|gamma\s+knife|cyberknife|novalis|linear\s+accelerator\s+(?:based\s+)?radiosurg)\w*\b",
-        "brain_avm": r"\b(?:brain|cerebral|intracranial)\s+(?:arteriovenous\s+malformation|avm)\b"
-    },
-    
-    "criteria": {
-        "min_year": 2000,
-        "sample_size_min": 10,
-        "adult_age_min": 18
+# Default cross-validation parameters
+DEFAULT_CV_PARAMS = {
+    "n_splits": 5,
+    "shuffle": True, 
+    "random_state": 42,
+    "stratified": True  # All experiments use StratifiedKFold
+}
+
+# Text processing parameters 
+TEXT_PROCESSING = {
+    "default_text_columns": ["title", "abstract"],
+    "normalization_options": ["stemming", "lemmatization", None],
+    "balancing_options": ["smote", None]
+}
+
+# Feature extraction parameters
+FEATURE_PARAMS = {
+    "expert_criteria_features": [
+        "population_brain_avm", "intervention_treatment", "outcome_clinical",
+        "study_design_rct", "language_english", "full_text_available"
+    ],
+    "mesh_terms_column": "mesh_terms"
+}
+
+# Evaluation metrics
+METRICS = {
+    "primary": ["precision", "recall", "f1", "f2", "roc_auc"],
+    "specialized": ["wss_at_95"],  # Work Saved over Sampling at 95% recall
+    "thresholds": {
+        "high_recall_target": 0.95,
+        "balanced_threshold": 0.5
     }
+}
+
+# Plotting configuration
+PLOT_CONFIG = {
+    "figure_size": (10, 8),
+    "dpi": 300,
+    "style": "seaborn-v0_8",
+    "color_palette": "husl"
 }

@@ -1,0 +1,13 @@
+{
+  "clf__C": 1,
+  "clf__class_weight": "balanced",
+  "clf__kernel": "linear",
+  "tfidf__max_df": 0.9,
+  "tfidf__max_features": 5000,
+  "tfidf__min_df": 3,
+  "tfidf__ngram_range": [
+    1,
+    3
+  ],
+  "optimal_threshold": 0.1470133749026906
+}

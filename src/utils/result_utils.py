@@ -1,9 +1,3 @@
-"""
-Utilities for standardizing result paths and organization.
-
-This module provides functions to create standardized output paths 
-for model results, ensuring consistent organization across experiments.
-"""
 import os
 from pathlib import Path
 import shutil
@@ -15,11 +9,12 @@ import seaborn as sns
 import joblib
 import logging
 from sklearn.metrics import precision_recall_curve, auc, confusion_matrix, roc_curve
+from src.models.feature_importance import get_feature_importance
+
 
 logger = logging.getLogger(__name__)
 
 def numpy_to_python(obj):
-    """Convert NumPy types to Python types for JSON serialization."""
     if isinstance(obj, np.generic):
         return obj.item()
     if isinstance(obj, np.ndarray):
@@ -27,110 +22,87 @@ def numpy_to_python(obj):
     return obj
 
 def ensure_dir(path):
-    """
-    Ensure that a directory exists, creating it if necessary.
-    
-    Args:
-        path: Path to check/create
-        
-    Returns:
-        str: The input path
-    """
+
     os.makedirs(path, exist_ok=True)
     return path
 
 def create_model_directories(output_dir, model_type=None, normalization=None):
-    """
-    Create the standardized directory structure for a model's results.
-    
-    Args:
-        output_dir: Output directory path
-        model_type: Type of model (logreg, svm, etc.)
-        normalization: Type of text normalization (stemming, lemmatization)
-        
-    Returns:
-        dict: Dictionary with paths to different directories
-    """
     model_dir = output_dir
-    bal_dir = ensure_dir(os.path.join(model_dir, "baseline"))
-    hr_dir = ensure_dir(os.path.join(model_dir, "recall_95"))
     
-    for subdir in ["models", "metrics", "plots"]:
+    models_dir = ensure_dir(os.path.join(model_dir, "models"))
+    metrics_dir = ensure_dir(os.path.join(model_dir, "metrics"))
+    plots_dir = ensure_dir(os.path.join(model_dir, "plots"))
+    ensure_dir(os.path.join(metrics_dir, "feature_importance"))
+    ensure_dir(os.path.join(plots_dir, "feature_importance"))
+    
+    bal_dir = ensure_dir(os.path.join(model_dir, "balanced"))
+    hr_dir = ensure_dir(os.path.join(model_dir, "highrecall"))
+    
+    for subdir in ["metrics", "plots"]:
         ensure_dir(os.path.join(bal_dir, subdir))
         ensure_dir(os.path.join(hr_dir, subdir))
     
-    ensure_dir(os.path.join(bal_dir, "metrics", "feature_importance"))
-    ensure_dir(os.path.join(bal_dir, "plots", "feature_importance"))
-    ensure_dir(os.path.join(hr_dir, "metrics", "feature_importance"))
-    ensure_dir(os.path.join(hr_dir, "plots", "feature_importance"))
-    
     return {
         "model_dir": model_dir,
+        "models_dir": models_dir,
+        "metrics_dir": metrics_dir,
+        "plots_dir": plots_dir,
         "balanced_dir": bal_dir,
         "highrecall_dir": hr_dir,
-        "bal_models_dir": os.path.join(bal_dir, "models"),
         "bal_metrics_dir": os.path.join(bal_dir, "metrics"),
         "bal_plots_dir": os.path.join(bal_dir, "plots"),
-        "hr_models_dir": os.path.join(hr_dir, "models"),
         "hr_metrics_dir": os.path.join(hr_dir, "metrics"),
         "hr_plots_dir": os.path.join(hr_dir, "plots")
     }
 
 def save_model_results(bal_model, hr_model, bal_metrics, hr_metrics, bal_params, hr_params, 
                      threshold, output_dir, model_type, X_val, y_val, y_prob_bal, y_prob_hr, ngram_analysis=None):
-    """
-    Save all model results to disk following the v2.0.0-f1-refactor directory structure.
-    
-    Args:
-        bal_model: Trained balanced model
-        hr_model: Trained high-recall model
-        bal_metrics: Metrics for balanced model
-        hr_metrics: Metrics for high-recall model
-        bal_params: Parameters for balanced model
-        hr_params: Parameters for high-recall model
-        threshold: Threshold for high-recall model
-        output_dir: Base output directory
-        model_type: Type of model (logreg, svm, etc.)
-        X_val: Validation features
-        y_val: Validation labels
-        y_prob_bal: Prediction probabilities from balanced model
-        y_prob_hr: Prediction probabilities from high-recall model
-        ngram_analysis: Analysis of n-gram performance (optional)
-    """
     dirs = create_model_directories(output_dir, model_type)
     model_dir = dirs["model_dir"]
+    models_dir = dirs["models_dir"]
+    metrics_dir = dirs["metrics_dir"]
+    plots_dir = dirs["plots_dir"]
     bal_dir = dirs["balanced_dir"]
     hr_dir = dirs["highrecall_dir"]
     
-    joblib.dump(bal_model, os.path.join(bal_dir, "models", "balanced.joblib"))
-    with open(os.path.join(bal_dir, "metrics", "balanced_params.json"), "w") as f:
+    cv_path_src = os.path.join(output_dir, "cv_results.csv")
+    cv_path_dst = os.path.join(model_dir, "cv_results.csv")
+    if os.path.exists(cv_path_src) and cv_path_src != cv_path_dst:
+        shutil.copy(cv_path_src, cv_path_dst)
+        logger.info(f"Copied CV results to {cv_path_dst}")
+    
+    model_path = os.path.join(models_dir, f"{model_type}_model.joblib")
+    joblib.dump(bal_model, model_path)
+    logger.info(f"Saved unified model to {model_path}")
+    
+    with open(os.path.join(metrics_dir, "model_params.json"), "w") as f:
         json.dump(bal_params, f, indent=2, default=numpy_to_python)
-    with open(os.path.join(bal_dir, "metrics", "balanced_metrics.json"), "w") as f:
+    
+    with open(os.path.join(bal_dir, "metrics", "threshold.json"), "w") as f:
+        json.dump({"threshold": 0.5}, f, indent=2)
+    with open(os.path.join(bal_dir, "metrics", "metrics.json"), "w") as f:
         json.dump(bal_metrics, f, indent=2, default=numpy_to_python)
-    
-    joblib.dump(hr_model, os.path.join(hr_dir, "models", "high_recall.joblib"))
-    with open(os.path.join(hr_dir, "metrics", "highrecall_params.json"), "w") as f:
-        json.dump(hr_params, f, indent=2, default=numpy_to_python)
-    with open(os.path.join(hr_dir, "metrics", "highrecall_metrics.json"), "w") as f:
-        json.dump(hr_metrics, f, indent=2, default=numpy_to_python)
-    with open(os.path.join(hr_dir, "metrics", "highrecall_threshold.json"), "w") as f:
-        json.dump({"threshold": threshold}, f, indent=2, default=numpy_to_python)
-    
-    plot_pr_curve(y_val, y_prob_bal, None, os.path.join(bal_dir, "plots", "pr_curve.png"))
-    plot_roc_curve(y_val, y_prob_bal, os.path.join(bal_dir, "plots", "roc_curve.png"))
-    plot_confusion_matrix(y_val, bal_model.predict(X_val), os.path.join(bal_dir, "plots", "confusion_matrix.png"))
-    
-    plot_pr_curve(y_val, y_prob_hr, None, os.path.join(hr_dir, "plots", "pr_curve.png"))
-    plot_roc_curve(y_val, y_prob_hr, os.path.join(hr_dir, "plots", "roc_curve.png"))
-    plot_confusion_matrix(y_val, (y_prob_hr >= threshold).astype(int), os.path.join(hr_dir, "plots", "confusion_matrix.png"))
-    
-    try:
-        from src.models.classifiers import get_feature_importance
         
-        features_bal = get_feature_importance(bal_model)
-        if not features_bal.empty:
-            features_bal.to_csv(
-                os.path.join(bal_dir, "metrics", "feature_importance", "balanced_features.csv"),
+    with open(os.path.join(hr_dir, "metrics", "threshold.json"), "w") as f:
+        json.dump({"threshold": threshold}, f, indent=2)
+    with open(os.path.join(hr_dir, "metrics", "metrics.json"), "w") as f:
+        json.dump(hr_metrics, f, indent=2, default=numpy_to_python)
+    
+    roc_path = os.path.join(plots_dir, "roc_curve.png")
+    pr_path = os.path.join(plots_dir, "pr_curve.png")
+    plot_roc_curve(y_val, y_prob_bal, roc_path)
+    plot_pr_curve(y_val, y_prob_bal, None, pr_path)
+    
+    plot_confusion_matrix(y_val, bal_model.predict(X_val), 
+                         os.path.join(bal_dir, "plots", "confusion_matrix.png"))
+    plot_confusion_matrix(y_val, (y_prob_hr >= threshold).astype(int), 
+                         os.path.join(hr_dir, "plots", "confusion_matrix.png"))
+    
+    try:        
+        features = get_feature_importance(bal_model)
+        if not features.empty:
+            features.to_csv(
+                os.path.join(metrics_dir, "feature_importance", "features.csv"),
                 index=False
             )
 
@@ -139,58 +111,34 @@ def save_model_results(bal_model, hr_model, bal_metrics, hr_metrics, bal_params,
             sns.barplot(
                 x="coefficient", 
                 y="feature",
-                data=features_bal[features_bal["class"] == "Relevant"].head(20)
+                data=features[features["class"] == "Relevant"].head(20)
             )
-            plt.title("Balanced Model - Top 20 Relevant Features")
+            plt.title(f"{model_type.capitalize()} Model - Top 20 Relevant Features")
             plt.subplot(2,1,2)
             sns.barplot(
                 x="coefficient", 
                 y="feature",
-                data=features_bal[features_bal["class"] == "Irrelevant"].head(20)
+                data=features[features["class"] == "Irrelevant"].head(20)
             )
-            plt.title("Balanced Model - Top 20 Irrelevant Features")
+            plt.title(f"{model_type.capitalize()} Model - Top 20 Irrelevant Features")
             plt.tight_layout()
-            plt.savefig(os.path.join(bal_dir, "plots", "feature_importance", "balanced_features.png"))
-            plt.close()
-
-        features_hr = get_feature_importance(hr_model)
-        if not features_hr.empty:
-            features_hr.to_csv(
-                os.path.join(hr_dir, "metrics", "feature_importance", "highrecall_features.csv"),
-                index=False
-            )
-
-            plt.figure(figsize=(12,10))
-            plt.subplot(2,1,1)
-            sns.barplot(
-                x="coefficient", 
-                y="feature",
-                data=features_hr[features_hr["class"] == "Relevant"].head(20)
-            )
-            plt.title("High-Recall Model - Top 20 Relevant Features")
-            plt.subplot(2,1,2)
-            sns.barplot(
-                x="coefficient", 
-                y="feature",
-                data=features_hr[features_hr["class"] == "Irrelevant"].head(20)
-            )
-            plt.title("High-Recall Model - Top 20 Irrelevant Features")
-            plt.tight_layout()
-            plt.savefig(os.path.join(hr_dir, "plots", "feature_importance", "highrecall_features.png"))
+            plt.savefig(os.path.join(plots_dir, "feature_importance", "features.png"))
             plt.close()
 
     except Exception as e:
         logger.warning(f"Could not extract feature importance: {e}")
+        import traceback
+        logger.debug(f"Traceback: {traceback.format_exc()}")
     
     create_comparison_markdown(bal_metrics, hr_metrics, bal_params, hr_params,
-                             os.path.join(model_dir, f"{model_type}_comparison.md"),
+                             os.path.join(model_dir, "SUMMARY.md"),
                              model_type, ngram_analysis)
     
-    logger.info(f"Balanced model results saved to {bal_dir}")
-    logger.info(f"High-recall model results saved to {hr_dir}")
+    logger.info(f"Model results saved to {model_dir}")
+    logger.info(f"Balanced configuration results saved to {bal_dir}")
+    logger.info(f"High-recall configuration results saved to {hr_dir}")
 
 def plot_pr_curve(y_true, y_prob, y_prob_hr=None, out_path=None):
-    """Plot precision-recall curve for one or two models"""
     plt.figure(figsize=(10, 6))
     prec, rec, _ = precision_recall_curve(y_true, y_prob)
     pr_auc = auc(rec, prec)
@@ -232,8 +180,6 @@ def plot_pr_curve(y_true, y_prob, y_prob_hr=None, out_path=None):
     return pr_auc
 
 def plot_roc_curve(y_true, y_prob, out_path=None):
-    """Plot ROC curve"""
-    
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
     
@@ -259,8 +205,6 @@ def plot_roc_curve(y_true, y_prob, out_path=None):
     return roc_auc
 
 def plot_confusion_matrix(y_true, y_pred, out_path=None):
-    """Plot confusion matrix"""
-    
     cm = confusion_matrix(y_true, y_pred)
     
     plt.figure(figsize=(8, 6))
@@ -283,7 +227,6 @@ def plot_confusion_matrix(y_true, y_pred, out_path=None):
 
 def create_comparison_markdown(balanced_metrics, hr_metrics, balanced_params, hr_params,
                              output_path, model_type="logreg", ngram_analysis=None):
-    """Create a markdown document comparing the balanced and high-recall models"""
     model_names = {
         "logreg": "Logistic Regression",
         "svm": "Support Vector Machine",
@@ -306,7 +249,10 @@ def create_comparison_markdown(balanced_metrics, hr_metrics, balanced_params, hr
         
         f.write("### High-Recall Model (95% Target)\n")
         for param, value in hr_params.items():
-            f.write(f"- {param}: {value}\n")
+            if param != 'optimal_threshold':
+                f.write(f"- {param}: {value}\n")
+        if 'optimal_threshold' in hr_params:
+            f.write(f"- threshold: {hr_params['optimal_threshold']}\n")
         f.write("\n")
         
         f.write("## Performance Comparison\n\n")
@@ -327,7 +273,7 @@ def create_comparison_markdown(balanced_metrics, hr_metrics, balanced_params, hr
         
         if ngram_analysis and len(ngram_analysis) > 1:
             f.write("\n## N-gram Range Analysis\n\n")
-            f.write("Based on our cross-validation results (see cv_results.csv), we found:\n\n")
+            f.write("Based on cross-validation results (see cv_results.csv), we found:\n\n")
             
             sorted_ngrams = sorted(ngram_analysis.items(), key=lambda x: x[1], reverse=True)
             
@@ -343,51 +289,16 @@ def create_comparison_markdown(balanced_metrics, hr_metrics, balanced_params, hr
                 worse_ngram = "(1,2)" if f1_13 > f1_12 else "(1,3)"
                 abs_diff = abs(diff)
                 
-                f.write(f"\nThe {better_ngram} n-gram range outperforms {worse_ngram} by **{abs_diff:.1f} percentage points** ")
-                
-                if abs_diff >= 9.5:
-                    f.write("- approximately 10 percentage points improvement, which aligns with findings from recent literature (LREC 2020).\n")
-                elif abs_diff >= 5:
-                    f.write("- a substantial improvement that supports using this configuration in the final model.\n")
-                else:
-                    f.write("- a modest improvement that should be considered alongside other hyperparameters.\n")
-            
-            f.write("\nFor detailed analysis, see the full grid search results in the cv_results.csv file.\n")
-        
-        f.write("\n## Analysis\n\n")
-        
-        f.write("### Methodology\n\n")
-        f.write("Following Cohen 2006 and Norman 2018, we performed a single grid search with multi-metric scoring\n")
-        f.write("and extracted two models:\n\n")
-        f.write("1. **Balanced model**: Optimized for F1 (best balance of precision and recall)\n")
-        f.write("2. **High-recall model**: Configuration with highest F1 score among those with recall ≥ 0.95\n\n")
-        
-        f.write("## Conclusion\n\n")
-        
-        bal_f1 = balanced_metrics.get('f1', 0)
-        hr_f1 = hr_metrics.get('f1', 0)
-        
-        if hr_f1 > bal_f1 and hr_metrics.get('recall', 0) >= 0.95:
-            f.write("The high-recall model achieves both higher recall (≥95%) and higher F1 score, ")
-            f.write("making it the preferred choice for systematic review screening.\n")
-        else:
-            f.write("The balanced model is best for general classification tasks where overall performance ")
-            f.write("is important, while the high-recall model is better suited for systematic review ")
-            f.write("screening where achieving high recall (≥95%) is crucial to ensure comprehensive coverage.\n")
+                f.write(f"\nThe {better_ngram} n-gram range outperforms {worse_ngram} by **{abs_diff:.1f} percentage points**.\n")
 
-    logger.info(f"Created comparison markdown at {output_path}")
+        f.write("\n## Methodological Notes\n\n")
+        f.write("The high-recall configuration utilizes the same underlying model as the balanced configuration, ")
+        f.write("with an adjusted decision threshold to prioritize recall (≥95%) at the expense of precision. ")
+        f.write("This approach maintains identical feature coefficients while modifying only the decision boundary.\n")
+
+    logger.info(f"Created comprehensive model summary at {output_path}")
 
 def archive_directory(directory_path, archive_dir="results/archive"):
-    """
-    Archive a directory by moving it to the archive folder.
-    
-    Args:
-        directory_path: Path to directory to archive
-        archive_dir: Destination directory for archived results
-        
-    Returns:
-        bool: True if archiving was successful, False otherwise
-    """
     os.makedirs(archive_dir, exist_ok=True)
     dir_name = os.path.basename(directory_path)
     dest_path = os.path.join(archive_dir, dir_name)

@@ -1,0 +1,40 @@
+{
+  "model_name": "svm_fixed_params",
+  "balanced": {
+    "precision": 0.5454545454545454,
+    "recall": 0.75,
+    "f1": 0.631578947368421,
+    "f2": 0.6976744186046512,
+    "roc_auc": 0.9495274914089347,
+    "wss_at_95": 0.7473241590214068,
+    "true_positives": 18,
+    "false_positives": 15,
+    "true_negatives": 179,
+    "false_negatives": 6
+  },
+  "high_recall": {
+    "precision": 0.24731182795698925,
+    "recall": 0.9583333333333334,
+    "f1": 0.3931623931623932,
+    "f2": 0.6084656084656085,
+    "roc_auc": 0.9495274914089347,
+    "wss_at_95": 0.7473241590214068,
+    "true_positives": 23,
+    "false_positives": 70,
+    "true_negatives": 124,
+    "false_negatives": 1
+  },
+  "threshold": 0.028720242073633846,
+  "params": {
+    "features__text_features__tfidf__max_features": 10000,
+    "features__text_features__tfidf__ngram_range": [
+      1,
+      3
+    ],
+    "features__text_features__tfidf__min_df": 5,
+    "features__text_features__tfidf__max_df": 0.85,
+    "clf__C": 1.0,
+    "clf__class_weight": "balanced",
+    "clf__kernel": "linear"
+  }
+}

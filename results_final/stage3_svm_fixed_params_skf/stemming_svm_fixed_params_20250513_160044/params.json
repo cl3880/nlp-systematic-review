@@ -1,0 +1,15 @@
+{
+  "balanced": {
+    "max_features": 5000,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 1,
+    "max_df": 0.85,
+    "C": 1,
+    "class_weight": "balanced",
+    "kernel": "linear"
+  },
+  "threshold": 0.057934393115332626
+}
