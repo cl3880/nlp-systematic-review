@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [3.0.1] – 2025-05-25
+### Added
+- Basic test suite under `tests/` (pytest)  
+- GitHub Actions workflow (`.github/workflows/ci.yml`)
 
 ## [3.0.0] – 2025-05-24
 ### Added
