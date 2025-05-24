@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.0.3] – 2025-05-24
+### Fixed
+- Added missing testing dependencies (`pytest`, `pytest-cov`, `imbalanced-learn`) to `requirements.txt`
+- Fixed GitHub Actions CI workflow failing due to missing dependencies
+
 ## [3.0.2] – 2025-05-24
 ### Added
 - Basic test suite under `tests/` (pytest)  

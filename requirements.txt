@@ -6,3 +6,6 @@ seaborn
 wordninja
 rapidfuzz
 nltk
+imbalanced-learn
+pytest
+pytest-cov
