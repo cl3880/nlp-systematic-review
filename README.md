@@ -8,6 +8,12 @@
 
 This repository implements a comprehensive machine-learning pipeline for systematic review screening of brain arteriovenous malformation (AVM) literature. Building on methodologies from the ACL and LREC communities, it evaluates multiple classifiers (SVM, Logistic Regression, Complement Naive Bayes, Cosine Similarity), text-normalization techniques (stemming, lemmatization), sampling methods (SMOTE, undersampling), and expert-derived features (inclusion/exclusion criteria, MeSH terms) to identify the best combination of classifier and hyperparameters. Unlike prior work, which often applies a single model with fixed settings, our experiments isolate each variable to reveal its individual impact. All techniques and parameter choices were adapted and extended from the references listed below and tested on a novel AVM dataset.
 
+## Documents
+
+The project includes comprehensive documentation:  
+- [Group 13 – Final Project (PDF)](docs/Group%2013%20-%20Final%20Project.pdf) - Academic paper (Grade: A)
+- [Final Results Summary (PDF)](docs/Final%20Results%20Summary.pdf) - Detailed technical methodology and experimental results
+
 ## Project Structure
 
 ```

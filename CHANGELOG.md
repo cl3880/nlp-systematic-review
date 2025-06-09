@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0] – 2025-06-08
+### Added
+- Project documentation under `docs/`
+  - Academic paper: "High-Recall NLP Screening for Systematic Reviews" (Grade: A)
+  - Final Results Summary: Detailed technical methodology and 4-stage experimental results
+- Updated README with links to both documents
+
 ## [3.0.3] – 2025-05-24
 ### Fixed
 - Added missing testing dependencies (`pytest`, `pytest-cov`, `imbalanced-learn`) to `requirements.txt`
